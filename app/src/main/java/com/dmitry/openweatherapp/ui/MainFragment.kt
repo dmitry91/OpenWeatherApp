@@ -14,7 +14,6 @@ import com.dmitry.openweatherapp.db.models.WeatherDB
 import com.dmitry.openweatherapp.models.Weather
 import com.dmitry.openweatherapp.presenter.PresenterMain
 import com.dmitry.openweatherapp.ui.adapters.MainItemRecyclerViewAdapter
-import com.dmitry.openweatherapp.utils.DefaultCities
 import kotlinx.coroutines.*
 import android.net.ConnectivityManager
 import android.net.NetworkInfo
@@ -26,7 +25,6 @@ class MainFragment : Fragment() {
     private var presenterMain = PresenterMain(this)
     private var list = ArrayList<Weather>()
     private var adapter: MainItemRecyclerViewAdapter?= null
-    val db = App.getInstance().getDatabase()
 
     @SuppressLint("ResourceType")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -36,11 +34,7 @@ class MainFragment : Fragment() {
         recyclerView.layoutManager = LinearLayoutManager(context)
         adapter = MainItemRecyclerViewAdapter(list, listener,this)
         recyclerView.setAdapter(adapter)
-        if (isInternetAvailable()){
-            refresh()
-        }else{
-            loadDataFromDB()
-        }
+        loadCity()
         return view
     }
 
@@ -55,42 +49,24 @@ class MainFragment : Fragment() {
         adapter!!.notifyDataSetChanged()
 
         if (isInternetAvailable()){
-            GlobalScope.launch {
-                db.weatherDao().insert(WeatherDB(weather))
-            }
+            presenterMain.saveWeatherToDB(weather)
         }
     }
 
-    fun loadCity(name:String){
-        presenterMain.getData(name)
+    fun loadCity(){
+        presenterMain.getData()
     }
 
-    fun refresh(){
-        loadCity(DefaultCities.CITY_1)
-        loadCity(DefaultCities.CITY_2)
-        loadCity(DefaultCities.CITY_3)
+    fun addCity(name:String){
+        if (isInternetAvailable()){
+            presenterMain.getData(name)
+        }
     }
 
     fun delete(weather: Weather) {
         list.remove(weather)
         adapter!!.notifyDataSetChanged()
-        GlobalScope.launch {
-            db.weatherDao().delete(WeatherDB(weather))
-        }
-    }
-
-    fun loadDataFromDB(){
-        GlobalScope.launch {
-            val weatherDB: ArrayList<WeatherDB> = db.weatherDao().allData as ArrayList<WeatherDB>
-            weatherDB.forEach {
-                val weather = Weather()
-                weather.id = it.id.toString()
-                weather.name = it.name
-                weather.main = Weather.Main()
-                weather.main!!.temp = it.temp
-                addCityToList(weather);
-            }
-        }
+        presenterMain.deleteWeatherFromDB(weather)
     }
 
     override fun onAttach(context: Context) {
@@ -113,7 +89,6 @@ class MainFragment : Fragment() {
     }
 
     fun isInternetAvailable(): Boolean {
-
         val cm = context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         var activeNetworkInfo: NetworkInfo? = null
         activeNetworkInfo = cm.activeNetworkInfo

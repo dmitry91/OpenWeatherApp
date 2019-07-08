@@ -54,7 +54,7 @@ class MainActivity : AppCompatActivity(), MainFragment.OnListFragmentInteraction
             .setView(textInputLayout)
             .setMessage("Enter city name for add")
             .setPositiveButton("Submit") { dialog, _ ->
-                mainFrag!!.loadCity(input.text.toString())
+                mainFrag!!.addCity(input.text.toString())
                 dialog.cancel()
             }
             .setNegativeButton("Cancel") { dialog, _ ->

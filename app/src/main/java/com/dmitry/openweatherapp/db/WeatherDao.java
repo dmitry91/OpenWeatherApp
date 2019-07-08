@@ -20,5 +20,7 @@ public interface WeatherDao {
     @Query("SELECT * FROM Weather")
     List<WeatherDB> getAllData();
 
+    @Query("SELECT * FROM Weather WHERE name LIKE :search")
+    WeatherDB loadWeather(String search);
 
 }

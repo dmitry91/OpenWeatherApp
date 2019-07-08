@@ -11,7 +11,19 @@ class PresenterMain (mainFragment: MainFragment) : OnFinishedListener {
     private var repositoryMain: RepositoryMain = RepositoryMain();
 
     fun getData(name:String) {
-        repositoryMain.getWeather(name, this)
+        repositoryMain.getWeatherByName(name, this)
+    }
+
+    fun getData() {
+        repositoryMain.getAllWeather(this)
+    }
+
+    fun saveWeatherToDB(weather: Weather){
+        repositoryMain.saveWeatherToDB(weather)
+    }
+
+    fun deleteWeatherFromDB(weather: Weather){
+        repositoryMain.deleteWeatherFromDB(weather)
     }
 
     override fun onFinished(any: Any) {
@@ -19,7 +31,6 @@ class PresenterMain (mainFragment: MainFragment) : OnFinishedListener {
     }
 
     override fun onFailure(t: Throwable) {
-        viewMain!!.loadDataFromDB()
         t.printStackTrace()
     }
 

@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
 import android.widget.TextView
 import com.dmitry.openweatherapp.R
 import com.dmitry.openweatherapp.models.Weather
@@ -46,6 +45,7 @@ class MainItemRecyclerViewAdapter(
         if (item.name == DefaultCities.CITY_1 || item.name == DefaultCities.CITY_2 || item.name == DefaultCities.CITY_3) {
             holder.mBtnDel.visibility = View.GONE
         } else {
+            holder.mBtnDel.visibility = View.VISIBLE
             holder.mBtnDel.setOnClickListener {
                 mainFragment.delete(item)
             }
@@ -54,8 +54,6 @@ class MainItemRecyclerViewAdapter(
             tag = item
             setOnClickListener(mOnClickListener)
         }
-
-
     }
 
     override fun getItemCount(): Int = mValues.size
