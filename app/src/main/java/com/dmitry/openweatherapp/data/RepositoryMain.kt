@@ -1,16 +1,16 @@
 package com.dmitry.openweatherapp.data
 
+import android.annotation.SuppressLint
 import com.dmitry.openweatherapp.db.App
 import com.dmitry.openweatherapp.db.models.WeatherDB
-import com.dmitry.openweatherapp.models.Forecast
 import com.dmitry.openweatherapp.models.Weather
 import com.dmitry.openweatherapp.network.WeatherAPI
 import com.dmitry.openweatherapp.presenter.interfaces.OnFinishedListener
 import com.dmitry.openweatherapp.utils.DefaultCities
+import io.reactivex.schedulers.Schedulers
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import kotlinx.coroutines.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlin.collections.ArrayList
 
 class RepositoryMain {
 
@@ -51,42 +51,44 @@ class RepositoryMain {
         }
     }
 
+    @SuppressLint("CheckResult")
     fun getWeatherByName(name: String, presenterMain: OnFinishedListener) {
         api = WeatherAPI.getClient()!!.create(WeatherAPI.ApiInterface::class.java)
-        val callToday = api!!.getWeather(name, units, key)
-        callToday.enqueue(object : Callback<Weather> {
-            override fun onResponse(call: Call<Weather>, response: Response<Weather>) {
-                if (response.body() != null) {
-                    presenterMain.onFinished(response.body())
+        api!!.getWeather(name, units, key).subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe({ s ->
+                if (s != null) {
+                    presenterMain.onFinished(s)
                 }
-            }
-
-            override fun onFailure(call: Call<Weather>, t: Throwable) {
-                GlobalScope.launch {
-                    val itDb = db.weatherDao().loadWeather(name)
-                    val weather = Weather()
-                    weather.id = itDb.id.toString()
-                    weather.name = itDb.name
-                    weather.main = Weather.Main()
-                    weather.main!!.temp = itDb.temp
-                    presenterMain.onFinished(weather)
-                }
-                t.printStackTrace()
-            }
-        })
+            },
+                { e ->
+                    println(e)
+                    GlobalScope.launch {
+                        val itDb = db.weatherDao().loadWeather(name)
+                        val weather = Weather()
+                        weather.id = itDb.id.toString()
+                        weather.name = itDb.name
+                        weather.main = Weather.Main()
+                        weather.main!!.temp = itDb.temp
+                        presenterMain.onFinished(weather)
+                    }
+                },
+                { println("onComplete") })
     }
 
+
+
+    @SuppressLint("CheckResult")
     fun getForecast(id: String, presenterForecast: OnFinishedListener) {
         api = WeatherAPI.getClient()!!.create(WeatherAPI.ApiInterface::class.java)
-        val callToday = api!!.getForecast(id, units, key)
-        callToday.enqueue(object : Callback<Forecast> {
-            override fun onResponse(call: Call<Forecast>, response: Response<Forecast>) {
-                presenterForecast.onFinished(response.body())
-            }
-            override fun onFailure(call: Call<Forecast>, t: Throwable) {
-                presenterForecast.onFailure(t)
-            }
-        })
+        api!!.getForecast(id, units, key)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe ({ s ->
+                if (s != null) {
+                    presenterForecast.onFinished(s)
+                }
+            },{e -> presenterForecast.onFailure(e)})
     }
 
     fun saveWeatherToDB(weather: Weather){

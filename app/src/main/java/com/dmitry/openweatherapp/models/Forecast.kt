@@ -14,6 +14,8 @@ class Forecast {
         val dt:String?= null
         @SerializedName("main")
         val main:Main?= null
+        @SerializedName("weather")
+        val detWeather:List<DetailsWeather>?= null
 
         class Main{
             @SerializedName("temp")
@@ -22,6 +24,12 @@ class Forecast {
             var pressure:String?=null
             @SerializedName("humidity")
             var humidity:String?=null
+        }
+        class DetailsWeather{
+            @SerializedName("description")
+            val description:String?=null
+            @SerializedName("icon")
+            val icon:String?=null
         }
     }
 

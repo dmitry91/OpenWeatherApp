@@ -34,7 +34,7 @@ class DetailsFragment : Fragment() {
     fun setData(forecast: Forecast){
         nameCity!!.setText(forecast.city!!.name)
         recyclerView!!.layoutManager = LinearLayoutManager(context)
-        val adapter = ForecastItemRecyclerViewAdapter(forecast.entities)
+        val adapter = ForecastItemRecyclerViewAdapter(forecast.entities, context!!)
         recyclerView!!.setAdapter(adapter)
     }
 

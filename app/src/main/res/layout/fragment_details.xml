@@ -8,10 +8,13 @@
         tools:context=".ui.DetailsFragment">
     <TextView
             android:id="@+id/nameCity"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="15dp"
-            tools:text="name"/>
+            android:padding="8dp"
+            android:gravity="center"
+            tools:text="name"
+            android:background="#20989898"
+            android:textColor="#009688"/>
     <android.support.v7.widget.RecyclerView
             android:id="@+id/list"
             android:layout_width="match_parent"
